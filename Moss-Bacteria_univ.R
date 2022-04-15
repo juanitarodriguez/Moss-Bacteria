@@ -717,3 +717,19 @@ perm.comm.phylum.rel2
 #!!! ANOVA general for phyllum!!!
 div.model.all <- lme(diversity(comm.phylum.rel) ~ Canopy*Bry, random = ~1|Site/Block, data = metadata.sub2)
 anova(div.model.all)
+
+### Figure per bacterial Phylum, showing differences between forest types and moss host species
+comm.sub.rare.phylum_dec <-  decostand(comm.sub.rare.phylum, method="hellinger")
+# Merge comm.sub.rare.phylum_dec with metadata
+Phyla_CanBry <- merge(metadata.sub2, comm.sub.rare.phylum_dec, by='row.names',all=TRUE)
+Phyla_filt <- Phyla_CanBry
+Phyla_filt[ , c('Row.names','SampleID','sample_or_control')] <- list(NULL)
+Phyla_filt_long <- pivot_longer(Phyla_filt, cols = Acidobacteria:Verrucomicrobia, names_to = "Phyla", values_to = "abund")
+
+# !!! Boxplot comparing forest types for each moss host species  
+Phyla_filt_box2 <- ggplot(data = Phyla_filt_long, aes(x = Bry, y = abund, fill=Canopy)) +
+  geom_boxplot(aes(fill=Canopy)) +
+  facet_wrap(~ Phyla, scales = "free")+
+  scale_fill_manual(values=alpha(c("saddlebrown" ,"forestgreen"), 0.7), name = "Host species") + 
+  theme(panel.background = element_rect(fill = "white", colour = "grey50")) + theme(strip.background = element_rect(colour = "black", fill = "white"))
+Phyla_filt_box2
